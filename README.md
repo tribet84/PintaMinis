@@ -106,12 +106,22 @@ Firestore streams are rejected server-side, and the SDK just keeps retrying.
 The key is not a secret (it ships inside `main.dart.js`); find it with
 `gcloud recaptcha keys list --project=paintforge-d8cf2`.
 
-Live at <https://pintaminis.com>. The project site and the legal documents are
-at <https://www.pintaminis.com>.
+Live at <https://pintaminis.com> — that domain also serves the project site
+and legal documents (the `docs/` folder). The app itself is at
+<https://app.pintaminis.com>.
 
 Hosting serves two sites from one project: `app` (the Flutter build) and `site`
-(the `docs/` folder). Deploy them separately with `--only hosting:app` or
-`--only hosting:site`.
+(the `docs/` folder, at the bare apex domain). Deploy them separately with
+`--only hosting:app` or `--only hosting:site`.
+
+Both domains resolve straight to Firebase Hosting's own global CDN — DNS-only,
+deliberately NOT behind Cloudflare's proxy: Spanish ISPs block Cloudflare's
+shared IP ranges during LaLiga match windows (anti-piracy court orders), and
+proxied domains go down as collateral damage. Photos are the one exception:
+`img.pintaminis.com` is a Cloudflare Worker that edge-caches Firebase Storage
+downloads (Storage egress is the metric with a real ceiling on the free
+tier). During a block window photos may fail on affected ISPs — they degrade
+softly to an empty slot — while the app itself stays reachable.
 
 To deploy the security rules together with the site:
 
