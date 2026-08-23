@@ -39,13 +39,17 @@ Future<void> main() async {
   });
 
   test('range filter narrows a brand to one of its ranges', () {
+    final all = repository.search('', brand: PaintBrand.vallejo);
     final washes = repository.search(
       '',
       brand: PaintBrand.vallejo,
       range: 'Game Color Wash',
     );
-    expect(washes, hasLength(8));
+    // The catalogue grows over time, so assert the filtering behaviour
+    // rather than a paint count that changes with every addition.
+    expect(washes, isNotEmpty);
     expect(washes.every((p) => p.range == 'Game Color Wash'), isTrue);
+    expect(washes.length, lessThan(all.length));
   });
 
   test('brand filter restricts results', () {

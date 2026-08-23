@@ -4,6 +4,8 @@
   "rangeOrder": [
     "Model Color",
     "Game Color",
+    "Game Color Fluo",
+    "Game Color Special FX",
     "Xpress Color",
     "Model Wash",
     "Game Color Wash"
@@ -206,6 +208,13 @@
       "hex": "#B8863B"
     },
     {
+      "id": "vallejo-70886-green-grey",
+      "name": "Green Grey",
+      "range": "Model Color",
+      "code": "70.886",
+      "hex": "#9CA68F"
+    },
+    {
       "id": "vallejo-70863-gunmetal-grey",
       "name": "Gunmetal Grey",
       "range": "Model Color",
@@ -218,6 +227,13 @@
       "range": "Model Color",
       "code": "70.895",
       "hex": "#4A5648"
+    },
+    {
+      "id": "vallejo-70858-ice-yellow",
+      "name": "Ice Yellow",
+      "range": "Model Color",
+      "code": "70.858",
+      "hex": "#F2EBB4"
     },
     {
       "id": "vallejo-70918-ivory",
@@ -409,6 +425,27 @@
       "hex": "#C9962C"
     },
     {
+      "id": "vallejo-72076-alien-purple",
+      "name": "Alien Purple",
+      "range": "Game Color",
+      "code": "72.076",
+      "hex": "#6E2A8C"
+    },
+    {
+      "id": "vallejo-72119-aquamarine",
+      "name": "Aquamarine",
+      "range": "Game Color",
+      "code": "72.119",
+      "hex": "#3FA8A0"
+    },
+    {
+      "id": "vallejo-72107-athena-skin",
+      "name": "Athena Skin",
+      "range": "Game Color",
+      "code": "72.107",
+      "hex": "#E8B79B"
+    },
+    {
       "id": "vallejo-72043-beasty-brown",
       "name": "Beasty Brown",
       "range": "Game Color",
@@ -514,6 +551,13 @@
       "hex": "#FCFCFA"
     },
     {
+      "id": "vallejo-72113-deep-magenta",
+      "name": "Deep Magenta",
+      "range": "Game Color",
+      "code": "72.113",
+      "hex": "#9C1F5C"
+    },
+    {
       "id": "vallejo-72041-dwarf-skin",
       "name": "Dwarf Skin",
       "range": "Game Color",
@@ -533,6 +577,13 @@
       "range": "Game Color",
       "code": "72.004",
       "hex": "#E9B384"
+    },
+    {
+      "id": "vallejo-72098-elfic-flesh",
+      "name": "Elfic Flesh",
+      "range": "Game Color",
+      "code": "72.098",
+      "hex": "#F0D2B8"
     },
     {
       "id": "vallejo-72032-escorpena-green",
@@ -640,6 +691,20 @@
       "hex": "#FFD52E"
     },
     {
+      "id": "vallejo-72019-night-blue",
+      "name": "Night Blue",
+      "range": "Game Color",
+      "code": "72.019",
+      "hex": "#1E2A44"
+    },
+    {
+      "id": "vallejo-72111-nocturnal-red",
+      "name": "Nocturnal Red",
+      "range": "Game Color",
+      "code": "72.111",
+      "hex": "#4E1A20"
+    },
+    {
       "id": "vallejo-72008-orange-fire",
       "name": "Orange Fire",
       "range": "Game Color",
@@ -731,6 +796,13 @@
       "hex": "#FFC400"
     },
     {
+      "id": "vallejo-72118-sunrise-blue",
+      "name": "Sunrise Blue",
+      "range": "Game Color",
+      "code": "72.118",
+      "hex": "#6FA8D4"
+    },
+    {
       "id": "vallejo-72024-turquoise",
       "name": "Turquoise",
       "range": "Game Color",
@@ -757,6 +829,69 @@
       "range": "Game Color",
       "code": "72.047",
       "hex": "#A8B5C7"
+    },
+    {
+      "id": "vallejo-72160-fluorescent-blue",
+      "name": "Fluorescent Blue",
+      "range": "Game Color Fluo",
+      "code": "72.160",
+      "hex": "#2E7AFF"
+    },
+    {
+      "id": "vallejo-72161-fluorescent-cold-green",
+      "name": "Fluorescent Cold Green",
+      "range": "Game Color Fluo",
+      "code": "72.161",
+      "hex": "#2EE8A0"
+    },
+    {
+      "id": "vallejo-72104-fluorescent-green",
+      "name": "Fluorescent Green",
+      "range": "Game Color Fluo",
+      "code": "72.104",
+      "hex": "#5BE12E"
+    },
+    {
+      "id": "vallejo-72158-fluorescent-magenta",
+      "name": "Fluorescent Magenta",
+      "range": "Game Color Fluo",
+      "code": "72.158",
+      "hex": "#FF2E9A"
+    },
+    {
+      "id": "vallejo-72156-fluorescent-orange",
+      "name": "Fluorescent Orange",
+      "range": "Game Color Fluo",
+      "code": "72.156",
+      "hex": "#FF7A1A"
+    },
+    {
+      "id": "vallejo-72157-fluorescent-red",
+      "name": "Fluorescent Red",
+      "range": "Game Color Fluo",
+      "code": "72.157",
+      "hex": "#FF3B30"
+    },
+    {
+      "id": "vallejo-72159-fluorescent-violet",
+      "name": "Fluorescent Violet",
+      "range": "Game Color Fluo",
+      "code": "72.159",
+      "hex": "#9B4DFF"
+    },
+    {
+      "id": "vallejo-72103-fluorescent-yellow",
+      "name": "Fluorescent Yellow",
+      "range": "Game Color Fluo",
+      "code": "72.103",
+      "hex": "#F6EB1E"
+    },
+    {
+      "id": "vallejo-72602-thick-blood",
+      "name": "Thick Blood",
+      "range": "Game Color Special FX",
+      "code": "72.602",
+      "hex": "#5C0E12"
     },
     {
       "id": "vallejo-72466-armour-green",
@@ -1345,6 +1480,13 @@
       "range": "Game Color Wash",
       "code": "73.203",
       "hex": "#4E3619"
+    },
+    {
+      "id": "vallejo-73208-yellow-wash",
+      "name": "Yellow Wash",
+      "range": "Game Color Wash",
+      "code": "73.208",
+      "hex": "#C9A227"
     }
   ]
 }
