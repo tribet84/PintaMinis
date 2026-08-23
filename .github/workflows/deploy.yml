@@ -1,0 +1,76 @@
+name: Deploy
+
+# Runs the test suite on every push and pull request against main, so a
+# broken PR shows red before it merges. Deploy only runs after tests pass
+# AND on main itself — this is the fix for the actual incident that
+# prompted this workflow: a commit (the AK Interactive catalog) landed on
+# main and sat there, live in the repo but never pushed to Firebase, because
+# every deploy up to now was a manual step someone had to remember to run.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# A second push while a deploy is mid-flight queues behind it instead of
+# racing it — Firebase Hosting deploys are atomic per-release, but running
+# two `firebase deploy` invocations concurrently against the same project
+# is asking for a confusing interleaved log at best.
+concurrency:
+  group: deploy-main
+  cancel-in-progress: false
+
+env:
+  FLUTTER_VERSION: '3.47.0'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
+
+  deploy:
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+      - run: flutter pub get
+
+      - name: Build web
+        run: tool/build_web.sh
+        env:
+          # Traceable to the exact commit that is live, same spirit as the
+          # local script's timestamp default.
+          BUILD_STAMP: ${{ github.sha }}
+          # PHOTO_CDN_HOST and RECAPTCHA_SITE_KEY are intentionally left
+          # unset here: tool/build_web.sh already defaults both to the
+          # production values, and RECAPTCHA_SITE_KEY is a public site key
+          # that ships inside the client bundle anyway — it was never a
+          # secret, just a constant kept in one place.
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+
+      - name: Deploy to Firebase
+        run: |
+          npm install -g firebase-tools@15
+          firebase deploy \
+            --only hosting:app,hosting:site,firestore:rules,firestore:indexes,storage:rules \
+            --project paintforge-d8cf2 \
+            --non-interactive

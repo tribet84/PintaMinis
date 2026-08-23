@@ -76,6 +76,17 @@ flutter run -d chrome      # web
 
 ### 4. Deploy to the web (Firebase Hosting)
 
+**Every push to `main` deploys automatically** via
+`.github/workflows/deploy.yml`: `flutter test` and `flutter analyze` gate the
+deploy, then hosting (both `app` and `site`), Firestore rules/indexes and
+Storage rules all go out together. Pull requests run the same test job
+without deploying, so a broken PR shows red before it merges. There is no
+longer a manual step to remember — this exists because a commit once sat on
+`main`, fully merged, without ever reaching production.
+
+The steps below are for local/manual deploys only — a hotfix from a laptop,
+or testing a build before it lands on `main`.
+
 The repo ships with `firebase.json` (Hosting + Firestore rules) and `.firebaserc`
 pointing at the `paintforge-d8cf2` project. Hosting serves `build/web` and rewrites
 every route to `index.html`, so Flutter's router owns navigation.
