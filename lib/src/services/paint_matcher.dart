@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart' hide Paint;
+
 import '../data/catalog_repository.dart';
 import '../models/paint.dart';
 import 'color_distance.dart';
@@ -71,6 +73,57 @@ List<PaintMatch> shelfSubstitutes(
     paint,
     limit: limit,
   );
+}
+
+/// A colour-search hit. Unlike [PaintMatch], the tier is nullable: search
+/// always answers with the nearest pots, and null tier is the honest label
+/// for "nothing is truly close — these are merely the least far".
+typedef ColorMatch = ({Paint paint, double deltaE, MatchTier? tier});
+
+/// The closest paints to an arbitrary [color], best first — the answer to
+/// "I need THIS colour: what gets me there?".
+///
+/// Only opaque paints compete. There is no source paint here to take a
+/// finish family from, and a picked colour is a colour, not a behaviour:
+/// a metallic's swatch hex and an ink's dried-on-white tone both lie about
+/// what lands on the model — the same lesson that keeps the equivalence
+/// matcher from crossing families.
+///
+/// Unlike the matcher, this never returns empty for want of a good match:
+/// past deltaE 10 the tier goes null and the UI is expected to say so.
+List<ColorMatch> closestToColor(
+  Iterable<Paint> candidates,
+  Color color, {
+  int limit = 12,
+}) {
+  final target = labFromColor(color);
+
+  final scored = <({Paint paint, double deltaE})>[];
+  for (final candidate in candidates) {
+    if (_finishOf(candidate) != _Finish.opaque) continue;
+    final candidateColor = candidate.color;
+    if (candidateColor == null) continue;
+    scored.add((
+      paint: candidate,
+      deltaE: deltaE2000(target, labFromColor(candidateColor)),
+    ));
+  }
+  scored.sort((a, b) => a.deltaE.compareTo(b.deltaE));
+
+  return [
+    for (final s in scored.take(limit))
+      (
+        paint: s.paint,
+        deltaE: s.deltaE,
+        tier: s.deltaE < 2
+            ? MatchTier.twin
+            : s.deltaE < 5
+                ? MatchTier.close
+                : s.deltaE < 10
+                    ? MatchTier.approximate
+                    : null,
+      ),
+  ];
 }
 
 List<PaintMatch> _closest(

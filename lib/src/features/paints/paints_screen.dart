@@ -11,6 +11,7 @@ import '../../widgets/paint_widgets.dart';
 import '../../widgets/brand_loader.dart';
 import '../../widgets/shelf_starter.dart';
 import '../../widgets/paint_detail_sheet.dart';
+import 'color_search_screen.dart';
 
 /// Which slice of the catalogue is on screen.
 enum PaintScope { mine, all }
@@ -292,23 +293,41 @@ class _FilterHeader extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-          child: TextField(
-            controller: searchController,
-            decoration: InputDecoration(
-              isDense: true,
-              hintText: l10n.searchHint,
-              prefixIcon: const Icon(Icons.search),
-              suffixIcon: searchController.text.isEmpty
-                  ? null
-                  : IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: () {
-                        searchController.clear();
-                        onSearchChanged();
-                      },
-                    ),
-            ),
-            onChanged: (_) => onSearchChanged(),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: searchController,
+                  decoration: InputDecoration(
+                    isDense: true,
+                    hintText: l10n.searchHint,
+                    prefixIcon: const Icon(Icons.search),
+                    suffixIcon: searchController.text.isEmpty
+                        ? null
+                        : IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              searchController.clear();
+                              onSearchChanged();
+                            },
+                          ),
+                  ),
+                  onChanged: (_) => onSearchChanged(),
+                ),
+              ),
+              // Text finds a paint you can name; the eyedropper finds one
+              // you can only picture. Side by side because they are the
+              // same question asked two ways.
+              IconButton(
+                tooltip: l10n.colorSearchTooltip,
+                icon: const Icon(Icons.colorize),
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const ColorSearchScreen(),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
         // Scope and brand share one row: both narrow the same list, so they
