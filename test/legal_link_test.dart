@@ -36,10 +36,13 @@ void main() {
     }
   });
 
-  test('share links are built on the app host', () {
+  test('share links are built on the app host, as a real path', () {
     final url = publicRecipeUrl('abc123');
 
-    expect(url, 'https://app.pintaminis.com/#/r/abc123');
+    // Path form, not the hash form: the id must reach the server so the
+    // sharePreview function can serve the recipe's Open Graph tags to
+    // crawlers. A hash fragment never leaves the browser.
+    expect(url, 'https://app.pintaminis.com/r/abc123');
     // Recovering the id from the link it produced is the round trip that
     // actually matters: the share flow is worthless if either half drifts.
     expect(publicRecipeIdFromUri(Uri.parse(url)), 'abc123');

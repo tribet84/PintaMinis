@@ -87,6 +87,12 @@ longer a manual step to remember — this exists because a commit once sat on
 The steps below are for local/manual deploys only — a hotfix from a laptop,
 or testing a build before it lands on `main`.
 
+**Cloud Functions deploy manually** (`firebase deploy --only functions`),
+not through CI: the pipeline's service account is scoped to hosting and
+rules on purpose, and the single function (`sharePreview`, the share-link
+Open Graph previews) changes rarely enough that widening CI's blast radius
+for it is a bad trade.
+
 The repo ships with `firebase.json` (Hosting + Firestore rules) and `.firebaserc`
 pointing at the `paintforge-d8cf2` project. Hosting serves `build/web` and rewrites
 every route to `index.html`, so Flutter's router owns navigation.

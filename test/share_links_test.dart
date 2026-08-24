@@ -3,8 +3,12 @@ import 'package:paintforge/src/services/share_links.dart';
 
 void main() {
   group('publicRecipeIdFromUri', () {
-    test('reads the id from the hash form the app itself generates', () {
+    test('reads the id from the link the app itself generates', () {
       final url = publicRecipeUrl('abc123');
+      // The share link is the PATH form, so crawlers can see the id (a
+      // hash fragment never reaches the server, so a hash link can never
+      // grow an Open Graph preview).
+      expect(url, 'https://app.pintaminis.com/r/abc123');
       expect(publicRecipeIdFromUri(Uri.parse(url)), 'abc123');
     });
 

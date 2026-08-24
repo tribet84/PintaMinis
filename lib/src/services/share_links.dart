@@ -24,9 +24,14 @@ const kFeedbackEmail = 'feedback@pintaminis.com';
 
 /// Shareable URL for a published recipe.
 ///
-/// Uses the hash fragment so it works with Flutter web's default URL
-/// strategy and never depends on hosting rewrites.
-String publicRecipeUrl(String publishedId) => '$kAppUrl/#/r/$publishedId';
+/// A REAL path, not the hash form the app itself navigates with: a hash
+/// fragment never reaches the server, so a crawler fetching a hash link
+/// can only ever see the generic front page. The path form hits the
+/// sharePreview function (hosting rewrite on /r/**), which serves the
+/// recipe's Open Graph tags to crawlers and bounces browsers straight to
+/// the hash form below — the format this app has parsed since the first
+/// shared recipe, so links from before the switch keep working untouched.
+String publicRecipeUrl(String publishedId) => '$kAppUrl/r/$publishedId';
 
 /// Extracts the published-recipe id from a URL the app was opened with,
 /// accepting both `/#/r/{id}` and `/r/{id}` forms.
