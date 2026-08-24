@@ -1,14 +1,25 @@
+import 'dart:typed_data';
+
+import 'package:flutter/foundation.dart' show compute, kIsWeb;
 import 'package:flutter/material.dart' hide Paint;
+import 'package:image/image.dart' as img;
 import 'package:provider/provider.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../../data/catalog_repository.dart';
 import '../../services/paint_matcher.dart';
+import '../../services/photo_eyedropper.dart';
 import '../../state/inventory_provider.dart';
 import '../../widgets/hsv_color_picker.dart';
 import '../../widgets/paint_detail_sheet.dart';
 import '../../widgets/paint_widgets.dart';
+import '../recipes/recipe_photo_picker.dart';
 import 'paints_screen.dart';
+
+/// compute() needs a top-level target; decoding a camera-sized photo on the
+/// UI thread visibly freezes the app everywhere but web (where there is no
+/// choice).
+img.Image? _decodeInIsolate(Uint8List bytes) => decodeForSampling(bytes);
 
 /// "I need THIS colour — what gets me there?"
 ///
@@ -30,6 +41,36 @@ class _ColorSearchScreenState extends State<ColorSearchScreen> {
 
   PaintScope? _scope;
 
+  /// A photo to sample from, replacing the HSV picker while present. This
+  /// is the question behind most colour searches — "what colour is THIS?"
+  /// — asked of a mini seen online or a part in a box, not of a colour
+  /// wheel in someone's head.
+  Uint8List? _photoBytes;
+  img.Image? _decodedPhoto;
+
+  Future<void> _pickPhoto() async {
+    final bytes = await pickPhotoBytes(context);
+    if (bytes == null) return;
+    final decoded = kIsWeb
+        ? _decodeInIsolate(bytes)
+        : await compute(_decodeInIsolate, bytes);
+    if (decoded == null || !mounted) return;
+    setState(() {
+      _photoBytes = bytes;
+      _decodedPhoto = decoded;
+    });
+  }
+
+  void _sample(Offset position, Size viewport) {
+    final sampled = sampleColorAt(
+      _decodedPhoto!,
+      viewport: viewport,
+      position: position,
+    );
+    if (sampled == null) return;
+    setState(() => _color = HSVColor.fromColor(sampled));
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -50,16 +91,35 @@ class _ColorSearchScreenState extends State<ColorSearchScreen> {
     final anyClose = matches.any((m) => m.tier != null);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.colorSearchTitle)),
+      appBar: AppBar(
+        title: Text(l10n.colorSearchTitle),
+        actions: [
+          IconButton(
+            tooltip: l10n.colorSearchFromPhoto,
+            icon: const Icon(Icons.add_photo_alternate_outlined),
+            onPressed: _pickPhoto,
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Column(
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-              child: HsvColorPicker(
-                color: _color,
-                onChanged: (value) => setState(() => _color = value),
-              ),
+              child: _decodedPhoto == null
+                  ? HsvColorPicker(
+                      color: _color,
+                      onChanged: (value) => setState(() => _color = value),
+                    )
+                  : _PhotoSampler(
+                      bytes: _photoBytes!,
+                      sampledColor: _color.toColor(),
+                      onSample: _sample,
+                      onClose: () => setState(() {
+                        _photoBytes = null;
+                        _decodedPhoto = null;
+                      }),
+                    ),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
@@ -147,6 +207,119 @@ class _ColorSearchScreenState extends State<ColorSearchScreen> {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// The picked photo as a tap-to-sample surface.
+///
+/// Tap or drag reads the pixel under the finger and feeds it to the colour
+/// search — "what colour is THIS bit of the mini". While the finger is
+/// down, a circular loupe magnifies the pixels around it, floating above
+/// the fingertip so the hand never hides what it is picking — a finger
+/// covers dozens of pixels, and without magnification sampling a specific
+/// highlight is a lottery. Letterbox bars around the photo stay dead:
+/// sampling the background would answer with a colour the photo does not
+/// contain.
+class _PhotoSampler extends StatefulWidget {
+  const _PhotoSampler({
+    required this.bytes,
+    required this.sampledColor,
+    required this.onSample,
+    required this.onClose,
+  });
+
+  final Uint8List bytes;
+
+  /// The colour currently under the finger; painted as the loupe's ring so
+  /// the answer is visible in the same glance as the question.
+  final Color sampledColor;
+
+  final void Function(Offset position, Size viewport) onSample;
+  final VoidCallback onClose;
+
+  @override
+  State<_PhotoSampler> createState() => _PhotoSamplerState();
+}
+
+class _PhotoSamplerState extends State<_PhotoSampler> {
+  static const _height = 220.0;
+  static const _loupeSize = 88.0;
+
+  /// How far the loupe floats above the fingertip.
+  static const _loupeLift = 24.0;
+
+  Offset? _touch;
+
+  void _move(Offset position, Size viewport) {
+    setState(() => _touch = position);
+    widget.onSample(position, viewport);
+  }
+
+  void _end() => setState(() => _touch = null);
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final viewport = Size(constraints.maxWidth, _height);
+        return Stack(
+          // The loupe rides ABOVE the finger, which near the top edge means
+          // above the photo itself — clipping it there would blind the
+          // picker exactly where precision matters.
+          clipBehavior: Clip.none,
+          children: [
+            GestureDetector(
+              onPanDown: (d) => _move(d.localPosition, viewport),
+              onPanUpdate: (d) => _move(d.localPosition, viewport),
+              onPanEnd: (_) => _end(),
+              onPanCancel: _end,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  width: viewport.width,
+                  height: viewport.height,
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  child: Image.memory(widget.bytes, fit: BoxFit.contain),
+                ),
+              ),
+            ),
+            if (_touch != null)
+              Positioned(
+                left: _touch!.dx - _loupeSize / 2,
+                top: _touch!.dy - _loupeSize - _loupeLift,
+                child: IgnorePointer(
+                  child: RawMagnifier(
+                    size: const Size(_loupeSize, _loupeSize),
+                    magnificationScale: 6,
+                    // The magnifier sits above the finger, so the focal
+                    // point shifts back DOWN by the same distance to keep
+                    // magnifying what is actually being touched.
+                    focalPointOffset:
+                        const Offset(0, _loupeSize / 2 + _loupeLift),
+                    decoration: MagnifierDecoration(
+                      shape: CircleBorder(
+                        side: BorderSide(color: widget.sampledColor, width: 4),
+                      ),
+                      shadows: const [
+                        BoxShadow(blurRadius: 8, color: Colors.black38),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            Positioned(
+              top: 4,
+              right: 4,
+              child: IconButton.filledTonal(
+                tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+                icon: const Icon(Icons.close, size: 18),
+                onPressed: widget.onClose,
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

@@ -10,10 +10,14 @@ import '../../data/catalog_repository.dart';
 import '../../data/recipe_photo_repository.dart';
 import '../../services/app_settings.dart';
 import '../../services/auth_service.dart';
+import '../../services/data_export.dart';
 import '../../services/external_link.dart';
 import '../../services/image_compressor.dart';
 import '../../services/install_hint.dart';
 import '../../services/share_links.dart';
+import '../../state/follows_provider.dart';
+import '../../state/inventory_provider.dart';
+import '../../state/paint_lists_provider.dart';
 import '../../state/recipes_provider.dart';
 import '../../widgets/account_avatar.dart';
 import '../admin/admin_screen.dart';
@@ -152,6 +156,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
     messenger.showSnackBar(
       SnackBar(content: Text(l10n.settingsPhotoSaved)),
     );
+  }
+
+  void _exportData(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final now = DateTime.now();
+    final json = buildExportJson(
+      catalog: context.read<CatalogRepository>(),
+      inventory: context.read<InventoryProvider>().entries,
+      recipes: context.read<RecipesProvider>().recipes,
+      lists: context.read<PaintListsProvider>().lists,
+      following: context.read<FollowsProvider>().following,
+      now: now,
+    );
+    final stamp =
+        '${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}';
+    downloadTextFile(
+      filename: 'pintaminis-export-$stamp.json',
+      content: json,
+    );
+    messenger.showSnackBar(SnackBar(content: Text(l10n.settingsExportDone)));
   }
 
   Future<void> _editDisplayName(BuildContext context) async {
@@ -318,6 +343,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onTap: () => ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('1.0.0 · $buildStamp')),
             ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.download_outlined),
+            title: Text(l10n.settingsExportTitle),
+            subtitle: Text(l10n.settingsExportSubtitle),
+            onTap: () => _exportData(context),
           ),
           ListTile(
             leading: const Icon(Icons.chat_bubble_outline),

@@ -126,6 +126,39 @@ List<ColorMatch> closestToColor(
   ];
 }
 
+/// Two pots on the same shelf that are the same colour to the eye.
+typedef OwnedTwin = ({Paint a, Paint b, double deltaE});
+
+/// Colour duplicates among the pots the user OWNS, nearest pair first.
+///
+/// The buying-advice question: "do I already own this colour under another
+/// label?" Same-brand pairs count too — Citadel sells the same colour as
+/// Base and Air, and owning both IS owning a duplicate colour, whatever the
+/// carrier. Finish families never pair up (a metallic and an opaque can
+/// share a hex and share nothing on the model), and only true twins
+/// (deltaE < 2) make the list: "kind of similar" is not advice, it is
+/// noise with a percentage sign.
+List<OwnedTwin> ownedTwins(CatalogRepository catalog, Set<String> ownedIds) {
+  final owned = [
+    for (final paint in catalog.paints)
+      if (ownedIds.contains(paint.id) && paint.color != null) paint,
+  ];
+  final labs = [for (final paint in owned) labFromColor(paint.color!)];
+
+  final twins = <OwnedTwin>[];
+  for (var i = 0; i < owned.length; i++) {
+    for (var j = i + 1; j < owned.length; j++) {
+      if (_finishOf(owned[i]) != _finishOf(owned[j])) continue;
+      final distance = deltaE2000(labs[i], labs[j]);
+      if (distance < 2) {
+        twins.add((a: owned[i], b: owned[j], deltaE: distance));
+      }
+    }
+  }
+  twins.sort((x, y) => x.deltaE.compareTo(y.deltaE));
+  return twins;
+}
+
 List<PaintMatch> _closest(
   Iterable<Paint> candidates,
   Paint paint, {

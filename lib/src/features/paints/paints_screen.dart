@@ -6,12 +6,14 @@ import '../../data/catalog_repository.dart';
 import '../../models/inventory_entry.dart';
 import '../../models/paint.dart';
 import '../../services/app_settings.dart';
+import '../../services/paint_matcher.dart';
 import '../../state/inventory_provider.dart';
 import '../../widgets/paint_widgets.dart';
 import '../../widgets/brand_loader.dart';
 import '../../widgets/shelf_starter.dart';
 import '../../widgets/paint_detail_sheet.dart';
 import 'color_search_screen.dart';
+import 'twins_screen.dart';
 
 /// Which slice of the catalogue is on screen.
 enum PaintScope { mine, all }
@@ -42,6 +44,21 @@ class _PaintsScreenState extends State<PaintsScreen> {
   PaintScope? _scope;
   var _selecting = false;
   final _selection = <String>{};
+
+  /// Twin count memo — O(owned²) colour distances is cheap once, not on
+  /// every rebuild a status toggle triggers.
+  Set<String>? _twinsForOwned;
+  var _twinCount = 0;
+
+  int _countTwins(CatalogRepository catalog, Set<String> ownedIds) {
+    if (_twinsForOwned == null ||
+        !_twinsForOwned!.containsAll(ownedIds) ||
+        _twinsForOwned!.length != ownedIds.length) {
+      _twinsForOwned = Set.of(ownedIds);
+      _twinCount = ownedTwins(catalog, ownedIds).length;
+    }
+    return _twinCount;
+  }
 
   @override
   void dispose() {
@@ -181,6 +198,7 @@ class _PaintsScreenState extends State<PaintsScreen> {
               searchController: _searchController,
               scope: scope,
               mineCount: mineCount,
+              twinCount: _countTwins(catalog, owned.keys.toSet()),
               brandNames: brandNames,
               brandFilter: _brandFilter,
               ranges: ranges,
@@ -257,6 +275,7 @@ class _FilterHeader extends StatelessWidget {
     required this.searchController,
     required this.scope,
     required this.mineCount,
+    required this.twinCount,
     required this.brandNames,
     required this.brandFilter,
     required this.ranges,
@@ -272,6 +291,9 @@ class _FilterHeader extends StatelessWidget {
   final TextEditingController searchController;
   final PaintScope scope;
   final int mineCount;
+
+  /// Colour duplicates on the shelf; the entry hides at zero.
+  final int twinCount;
   final Map<PaintBrand, String> brandNames;
   final PaintBrand? brandFilter;
 
@@ -428,6 +450,18 @@ class _FilterHeader extends StatelessWidget {
                   style: Theme.of(context).textTheme.labelMedium,
                 ),
               ),
+              // Only exists when there IS something to show: an entry that
+              // usually says "0 duplicates" would train eyes to skip it.
+              if (twinCount > 0 && scope == PaintScope.mine)
+                TextButton.icon(
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const TwinsScreen(),
+                    ),
+                  ),
+                  icon: const Icon(Icons.join_full_outlined, size: 18),
+                  label: Text(l10n.twinsFound(twinCount)),
+                ),
               TextButton.icon(
                 onPressed: resultCount == 0 ? null : onStartSelecting,
                 icon: const Icon(Icons.checklist, size: 18),
