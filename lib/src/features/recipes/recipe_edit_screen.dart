@@ -7,7 +7,7 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../../data/recipe_photo_repository.dart';
 import '../../models/recipe.dart';
 import '../../services/image_compressor.dart';
-import '../../services/photo_cdn.dart';
+import '../../widgets/recipe_photo.dart';
 import '../../state/recipes_provider.dart';
 import '../../widgets/technique_widgets.dart';
 import 'recipe_photo_picker.dart';
@@ -420,12 +420,11 @@ class _PhotoField extends StatelessWidget {
       preview = Image.memory(pendingPhoto!, height: 180,
           width: double.infinity, fit: BoxFit.cover);
     } else if (photoUrl != null) {
-      preview = Image.network(
-        cdnPhotoUrl(photoUrl!),
+      preview = StoragePhoto(
+        url: photoUrl!,
         height: 180,
         width: double.infinity,
         fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => const SizedBox.shrink(),
       );
     } else {
       preview = Image.memory(legacyBytes!, height: 180,

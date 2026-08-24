@@ -31,8 +31,24 @@ class _RecipePhotoViewer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final url = recipe.photoUrl;
     final provider = recipePhotoProvider(recipe);
     if (provider == null) return const SizedBox.shrink();
+
+    final brokenIcon = Icon(
+      Icons.broken_image_outlined,
+      size: 64,
+      color: Colors.white.withValues(alpha: 0.7),
+    );
+    // Storage photos get the CDN fallback; legacy base64 keeps the plain
+    // provider — memory never fails over a network block.
+    final photo = url != null && url.isNotEmpty
+        ? StoragePhoto(url: url, fit: BoxFit.contain, errorWidget: brokenIcon)
+        : Image(
+            image: provider,
+            fit: BoxFit.contain,
+            errorBuilder: (_, __, ___) => brokenIcon,
+          );
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -50,15 +66,7 @@ class _RecipePhotoViewer extends StatelessWidget {
                   child: InteractiveViewer(
                     minScale: 1,
                     maxScale: 5,
-                    child: Image(
-                      image: provider,
-                      fit: BoxFit.contain,
-                      errorBuilder: (_, __, ___) => Icon(
-                        Icons.broken_image_outlined,
-                        size: 64,
-                        color: Colors.white.withValues(alpha: 0.7),
-                      ),
-                    ),
+                    child: photo,
                   ),
                 ),
               ),
