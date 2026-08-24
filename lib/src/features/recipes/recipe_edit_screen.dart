@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -32,6 +33,7 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
   late final TextEditingController _descriptionController;
   late List<RecipeSection> _sections;
   late List<RecipeLink> _links;
+
   /// Existing photo URL, if the recipe already had one.
   String? _photoUrl;
 
@@ -48,8 +50,9 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.recipe?.name ?? '');
-    _descriptionController =
-        TextEditingController(text: widget.recipe?.description ?? '');
+    _descriptionController = TextEditingController(
+      text: widget.recipe?.description ?? '',
+    );
     _sections = List.of(widget.recipe?.sections ?? const []);
     _links = List.of(widget.recipe?.links ?? const []);
     _photoUrl = widget.recipe?.photoUrl;
@@ -62,109 +65,146 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
     super.dispose();
   }
 
+  /// Whether the draft differs from what was opened.
+  ///
+  /// Sections and links compare by IDENTITY, not by value, and that is
+  /// enough: List.of copies the list but not its elements, so an untouched
+  /// section is still the exact same object, while any edit path replaces
+  /// it — equality operators on the model would buy nothing here.
+  bool get _isDirty {
+    final original = widget.recipe;
+    if (_pendingPhoto != null || _photoCleared) return true;
+    if (_nameController.text.trim() != (original?.name ?? '')) return true;
+    if (_descriptionController.text.trim() != (original?.description ?? '')) {
+      return true;
+    }
+    if (!listEquals(_sections, original?.sections ?? const [])) return true;
+    if (!listEquals(_links, original?.links ?? const [])) return true;
+    return false;
+  }
+
+  /// Back must never eat typed work silently. canPop stays false so EVERY
+  /// back attempt lands here with the dirtiness computed at that moment —
+  /// a conditional canPop goes stale, since typing in a controller does not
+  /// rebuild this widget. Saving is unaffected: Navigator.pop() bypasses
+  /// PopScope by design; only back gestures ask permission.
+  Future<void> _onPopAttempt(bool didPop, Object? result) async {
+    if (didPop) return;
+    final navigator = Navigator.of(context);
+    if (!_isDirty || await confirmDiscardChanges(context)) {
+      if (mounted) navigator.pop();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.recipe == null ? l10n.recipesNew : l10n.recipeEdit),
-        actions: [
-          TextButton(
-            onPressed: _saving ? null : _save,
-            child: Text(l10n.actionSave),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: _onPopAttempt,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            widget.recipe == null ? l10n.recipesNew : l10n.recipeEdit,
           ),
-        ],
-      ),
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            _PhotoField(
-              pendingPhoto: _pendingPhoto,
-              photoUrl: _photoCleared ? null : _photoUrl,
-              legacyPhoto: _photoCleared ? null : widget.recipe?.photo,
-              onPick: () async {
-                final bytes = await pickAndCompressRecipePhoto(context);
-                if (bytes != null) {
-                  setState(() {
-                    _pendingPhoto = bytes;
-                    _photoCleared = false;
-                  });
-                }
-              },
-              onRemove: () => setState(() {
-                _pendingPhoto = null;
-                _photoCleared = true;
-              }),
+          actions: [
+            TextButton(
+              onPressed: _saving ? null : _save,
+              child: Text(l10n.actionSave),
             ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _nameController,
-              textCapitalization: TextCapitalization.sentences,
-              decoration: InputDecoration(
-                labelText: l10n.recipeNameLabel,
-                hintText: l10n.recipeNameHint,
+          ],
+        ),
+        body: SafeArea(
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              _PhotoField(
+                pendingPhoto: _pendingPhoto,
+                photoUrl: _photoCleared ? null : _photoUrl,
+                legacyPhoto: _photoCleared ? null : widget.recipe?.photo,
+                onPick: () async {
+                  final bytes = await pickAndCompressRecipePhoto(context);
+                  if (bytes != null) {
+                    setState(() {
+                      _pendingPhoto = bytes;
+                      _photoCleared = false;
+                    });
+                  }
+                },
+                onRemove: () => setState(() {
+                  _pendingPhoto = null;
+                  _photoCleared = true;
+                }),
               ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _descriptionController,
-              textCapitalization: TextCapitalization.sentences,
-              maxLines: 2,
-              decoration: InputDecoration(
-                labelText: l10n.recipeDescriptionLabel,
-              ),
-            ),
-            const SizedBox(height: 24),
-            _Header(
-              title: l10n.recipeLinksTitle,
-              onAdd: _addLink,
-              addLabel: l10n.recipeAddLink,
-            ),
-            for (var i = 0; i < _links.length; i++)
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: Icon(
-                  _links[i].isYouTube ? Icons.ondemand_video : Icons.link,
-                ),
-                title: Text(_links[i].title),
-                subtitle: Text(
-                  _links[i].url,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                trailing: IconButton(
-                  icon: const Icon(Icons.delete_outline),
-                  onPressed: () => setState(() => _links.removeAt(i)),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _nameController,
+                textCapitalization: TextCapitalization.sentences,
+                decoration: InputDecoration(
+                  labelText: l10n.recipeNameLabel,
+                  hintText: l10n.recipeNameHint,
                 ),
               ),
-            const SizedBox(height: 16),
-            _Header(
-              title: l10n.recipeSectionsTitle,
-              onAdd: _addSection,
-              addLabel: l10n.recipeAddSection,
-            ),
-            for (var i = 0; i < _sections.length; i++)
-              Card(
-                margin: const EdgeInsets.symmetric(vertical: 4),
-                child: ListTile(
-                  title: Text(_sections[i].name),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _descriptionController,
+                textCapitalization: TextCapitalization.sentences,
+                maxLines: 2,
+                decoration: InputDecoration(
+                  labelText: l10n.recipeDescriptionLabel,
+                ),
+              ),
+              const SizedBox(height: 24),
+              _Header(
+                title: l10n.recipeLinksTitle,
+                onAdd: _addLink,
+                addLabel: l10n.recipeAddLink,
+              ),
+              for (var i = 0; i < _links.length; i++)
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: Icon(
+                    _links[i].isYouTube ? Icons.ondemand_video : Icons.link,
+                  ),
+                  title: Text(_links[i].title),
                   subtitle: Text(
-                    '${l10n.listPaintCount(_sections[i].paintIds.length)}'
-                    '${_sections[i].techniques.isEmpty ? '' : ' · ${_sections[i].techniques.map((t) => techniqueLabel(l10n, t)).join(', ')}'}',
-                    maxLines: 2,
+                    _links[i].url,
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   trailing: IconButton(
-                    tooltip: l10n.recipeRemoveSection,
                     icon: const Icon(Icons.delete_outline),
-                    onPressed: () => setState(() => _sections.removeAt(i)),
+                    onPressed: () => setState(() => _links.removeAt(i)),
                   ),
-                  onTap: () => _editSection(i),
                 ),
+              const SizedBox(height: 16),
+              _Header(
+                title: l10n.recipeSectionsTitle,
+                onAdd: _addSection,
+                addLabel: l10n.recipeAddSection,
               ),
-          ],
+              for (var i = 0; i < _sections.length; i++)
+                Card(
+                  margin: const EdgeInsets.symmetric(vertical: 4),
+                  child: ListTile(
+                    title: Text(_sections[i].name),
+                    subtitle: Text(
+                      '${l10n.listPaintCount(_sections[i].paintIds.length)}'
+                      '${_sections[i].techniques.isEmpty ? '' : ' · ${_sections[i].techniques.map((t) => techniqueLabel(l10n, t)).join(', ')}'}',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    trailing: IconButton(
+                      tooltip: l10n.recipeRemoveSection,
+                      icon: const Icon(Icons.delete_outline),
+                      onPressed: () => setState(() => _sections.removeAt(i)),
+                    ),
+                    onTap: () => _editSection(i),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -270,8 +310,7 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
               label: l10n.recipeShareNudgeAction,
               // The editor is popped by then; the navigator outlives it and
               // its context can still host the consent dialog.
-              onPressed: () =>
-                  confirmAndShareRecipe(navigator.context, saved),
+              onPressed: () => confirmAndShareRecipe(navigator.context, saved),
             ),
           ),
         );
@@ -305,8 +344,8 @@ class _Header extends StatelessWidget {
           child: Text(
             title,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+              color: Theme.of(context).colorScheme.primary,
+            ),
           ),
         ),
         TextButton.icon(
@@ -362,15 +401,17 @@ Future<RecipeLink?> showRecipeLinkDialog(BuildContext context) {
                 final title = titleController.text.trim();
                 final url = urlController.text.trim();
                 final uri = Uri.tryParse(url);
-                final valid = uri != null &&
+                final valid =
+                    uri != null &&
                     (uri.scheme == 'http' || uri.scheme == 'https') &&
                     uri.host.isNotEmpty;
                 if (title.isEmpty || !valid) {
                   setState(() => urlError = !valid);
                   return;
                 }
-                Navigator.of(dialogContext)
-                    .pop(RecipeLink(title: title, url: url));
+                Navigator.of(
+                  dialogContext,
+                ).pop(RecipeLink(title: title, url: url));
               },
               child: Text(l10n.actionSave),
             ),
@@ -417,8 +458,12 @@ class _PhotoField extends StatelessWidget {
 
     final Widget preview;
     if (pendingPhoto != null) {
-      preview = Image.memory(pendingPhoto!, height: 180,
-          width: double.infinity, fit: BoxFit.cover);
+      preview = Image.memory(
+        pendingPhoto!,
+        height: 180,
+        width: double.infinity,
+        fit: BoxFit.cover,
+      );
     } else if (photoUrl != null) {
       preview = StoragePhoto(
         url: photoUrl!,
@@ -427,17 +472,18 @@ class _PhotoField extends StatelessWidget {
         fit: BoxFit.cover,
       );
     } else {
-      preview = Image.memory(legacyBytes!, height: 180,
-          width: double.infinity, fit: BoxFit.cover);
+      preview = Image.memory(
+        legacyBytes!,
+        height: 180,
+        width: double.infinity,
+        fit: BoxFit.cover,
+      );
     }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: preview,
-        ),
+        ClipRRect(borderRadius: BorderRadius.circular(12), child: preview),
         const SizedBox(height: 4),
         Row(
           children: [

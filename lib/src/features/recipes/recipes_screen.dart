@@ -9,7 +9,7 @@ import '../../widgets/paint_widgets.dart';
 import '../../widgets/recipe_card.dart';
 import 'public_recipe_screen.dart';
 import 'recipe_detail_screen.dart';
-import 'recipe_edit_screen.dart';
+import 'quick_recipe_screen.dart';
 import '../../widgets/brand_loader.dart';
 
 /// Every recipe available to the user — the ones they wrote and the ones they
@@ -40,7 +40,7 @@ class RecipesScreen extends StatelessWidget {
               action: FilledButton.icon(
                 onPressed: () => Navigator.of(context).push(
                   MaterialPageRoute<void>(
-                    builder: (_) => const RecipeEditScreen(),
+                    builder: (_) => const QuickRecipeScreen(),
                   ),
                 ),
                 icon: const Icon(Icons.add),
@@ -81,7 +81,7 @@ class RecipesScreen extends StatelessWidget {
               heroTag: 'recipes-new',
               onPressed: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
-                  builder: (_) => const RecipeEditScreen(),
+                  builder: (_) => const QuickRecipeScreen(),
                 ),
               ),
               icon: const Icon(Icons.add),

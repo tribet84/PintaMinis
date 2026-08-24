@@ -9,6 +9,40 @@ import '../../services/share_links.dart';
 import '../../state/paint_lists_provider.dart';
 import '../../state/recipes_provider.dart';
 
+/// Asks whether unsaved edits should really be thrown away. True = leave.
+///
+/// Every draft screen (recipe editor, quick create, section editor) guards
+/// its back gesture with this: losing typed work to a stray back press is
+/// the most expensive friction an editor can have, and it costs nothing to
+/// ask — the dialog only appears when something was actually changed.
+Future<bool> confirmDiscardChanges(BuildContext context) async {
+  final l10n = AppLocalizations.of(context);
+  final discard = await showDialog<bool>(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      title: Text(l10n.recipeDiscardTitle),
+      content: Text(l10n.recipeDiscardBody),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(dialogContext).pop(false),
+          child: Text(l10n.recipeKeepEditing),
+        ),
+        // Filled and destructive-flavoured on purpose: this is the button
+        // that eats work, it must not look like the safe default.
+        FilledButton(
+          style: FilledButton.styleFrom(
+            backgroundColor: Theme.of(dialogContext).colorScheme.error,
+            foregroundColor: Theme.of(dialogContext).colorScheme.onError,
+          ),
+          onPressed: () => Navigator.of(dialogContext).pop(true),
+          child: Text(l10n.recipeDiscardAction),
+        ),
+      ],
+    ),
+  );
+  return discard ?? false;
+}
+
 /// Asks whether to turn [recipe] into a paint list, and does it.
 ///
 /// The list is a snapshot of the paints the recipe uses: it does not stay in
