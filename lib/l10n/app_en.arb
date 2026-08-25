@@ -538,6 +538,8 @@
   "scanTitle": "Scan pots",
   "scanTooltip": "Scan pot barcodes",
   "scanHint": "Point the camera at a pot's barcode.",
+  "scanFocusHint": "Blurry? Move the pot back a little — most cameras can't focus that close. Tap the code on screen to refocus.",
+  "scanTorchTooltip": "Toggle flashlight",
   "scanStatusAdded": "{name} — added to your shelf",
   "@scanStatusAdded": {"placeholders": {"name": {"type": "String"}}},
   "scanStatusOwned": "{name} — already on your shelf",

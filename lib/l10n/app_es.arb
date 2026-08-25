@@ -327,6 +327,8 @@
   "scanTitle": "Escanear botes",
   "scanTooltip": "Escanear códigos de barras",
   "scanHint": "Apunta la cámara al código de barras de un bote.",
+  "scanFocusHint": "¿Se ve borroso? Aleja un poco el bote — la mayoría de cámaras no enfocan tan cerca. Toca el código en pantalla para reenfocar.",
+  "scanTorchTooltip": "Activar/desactivar linterna",
   "scanStatusAdded": "{name} — añadida a tu estantería",
   "scanStatusOwned": "{name} — ya la tienes",
   "scanStatusUnknown": "Nadie ha enseñado este código aún — apartado abajo.",

@@ -32,6 +32,14 @@ class _BarcodeScanScreenState extends State<BarcodeScanScreen> {
     inventory: context.read<InventoryProvider>(),
   );
 
+  /// Defaults left off by the package are exactly what a tiny pot label
+  /// needs turned on: autoZoom pushes in when a code is too small in frame
+  /// to read (the usual cause of "it looks blurry" — the lens is in focus,
+  /// the barcode is just rendered at too few pixels), and tapToFocus (wired
+  /// through MobileScanner below) lets a still-blurry shot be corrected by
+  /// touching the code instead of guessing at distance.
+  late final _controller = MobileScannerController(autoZoom: true);
+
   /// Only true EAN shapes reach the session: the camera also reads QR codes
   /// and whatever else crosses the frame, and none of that is a pot.
   static final _eanShape = RegExp(r'^[0-9]{8,14}$');
@@ -39,6 +47,7 @@ class _BarcodeScanScreenState extends State<BarcodeScanScreen> {
   @override
   void dispose() {
     _session.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -84,15 +93,57 @@ class _BarcodeScanScreenState extends State<BarcodeScanScreen> {
     final catalog = context.read<CatalogRepository>();
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.scanTitle)),
+      appBar: AppBar(
+        title: Text(l10n.scanTitle),
+        actions: [
+          // Low light forces a longer exposure, which reads as motion blur
+          // on a hand-held pot — the torch is the direct fix for that,
+          // distinct from the focus problem tapToFocus solves.
+          ValueListenableBuilder<MobileScannerState>(
+            valueListenable: _controller,
+            builder: (context, state, child) {
+              if (state.torchState == TorchState.unavailable) {
+                return const SizedBox.shrink();
+              }
+              return IconButton(
+                tooltip: l10n.scanTorchTooltip,
+                icon: Icon(
+                  state.torchState == TorchState.on
+                      ? Icons.flash_on
+                      : Icons.flash_off,
+                ),
+                onPressed: _controller.toggleTorch,
+              );
+            },
+          ),
+        ],
+      ),
       body: SafeArea(
         child: ListenableBuilder(
           listenable: _session,
           builder: (context, _) => Column(
             children: [
               SizedBox(
-                height: 280,
-                child: MobileScanner(onDetect: _onDetect),
+                height: 320,
+                child: MobileScanner(
+                  controller: _controller,
+                  onDetect: _onDetect,
+                  tapToFocus: true,
+                ),
+              ),
+              // Most phone cameras have a minimum focus distance a pot held
+              // right up to the lens sits well inside — no autofocus
+              // setting fixes that, only backing off does. Said once,
+              // plainly, instead of a scanner that just seems to not work.
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+                child: Text(
+                  l10n.scanFocusHint,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                ),
               ),
               // One line of live feedback, not a snackbar per pot: at one
               // scan a second, stacked snackbars would bury the camera.
