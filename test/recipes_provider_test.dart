@@ -98,6 +98,29 @@ void main() {
     expect(recipes.isLinked(publishedId), isTrue);
   });
 
+  test('duplicating copies content but never sharing state or the photo',
+      () async {
+    final recipe = await createRecipe();
+    await recipes.publish(recipe);
+    await settle();
+    final original = recipes.byId(recipe.id)!;
+
+    final copyId = await recipes.duplicate(original, copyName: 'Copy');
+    await settle();
+    final copy = recipes.byId(copyId)!;
+
+    expect(copy.name, 'Copy');
+    expect(copy.sections, original.sections);
+    // A copy nobody asked to publish must never be born public — and it
+    // must not share the original's publishedId, or unsharing one would
+    // silently affect the other.
+    expect(copy.isPublished, isFalse);
+    expect(copy.publishedId, isNull);
+    // The photo is one Storage object; deleting either recipe deletes it
+    // by URL, so sharing the pointer would break the surviving recipe.
+    expect(copy.photoUrl, isNull);
+  });
+
   test('publishing carries the author photo alongside the name', () async {
     final withPhoto = RecipesProvider(
       repository: repository,

@@ -13,6 +13,7 @@ import '../../state/inventory_provider.dart';
 import '../../widgets/hsv_color_picker.dart';
 import '../../widgets/paint_detail_sheet.dart';
 import '../../widgets/paint_widgets.dart';
+import '../recipes/quick_recipe_screen.dart';
 import '../recipes/recipe_photo_picker.dart';
 import 'paints_screen.dart';
 
@@ -48,6 +49,11 @@ class _ColorSearchScreenState extends State<ColorSearchScreen> {
   Uint8List? _photoBytes;
   img.Image? _decodedPhoto;
 
+  /// Colours collected for a recipe draft. The bridge from "what colour is
+  /// this" to "how do I paint this": sample the mini's key tones, then one
+  /// tap turns them into a quick-recipe draft of matching paints.
+  final _palette = <Color>[];
+
   Future<void> _pickPhoto() async {
     final bytes = await pickPhotoBytes(context);
     if (bytes == null) return;
@@ -59,6 +65,32 @@ class _ColorSearchScreenState extends State<ColorSearchScreen> {
       _photoBytes = bytes;
       _decodedPhoto = decoded;
     });
+  }
+
+  void _createRecipeFromPalette() {
+    final l10n = AppLocalizations.of(context);
+    final catalog = context.read<CatalogRepository>();
+    final owned = context.read<InventoryProvider>().entries;
+    final candidates = _scope == PaintScope.mine
+        ? catalog.paints.where((p) => owned.containsKey(p.id))
+        : catalog.paints;
+
+    final paints = paintsForPalette(candidates, _palette);
+    if (paints.isEmpty) {
+      // Every sampled colour was too far from anything in scope — an empty
+      // draft would just look broken.
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.colorSearchPaletteNoMatch)),
+      );
+      return;
+    }
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => QuickRecipeScreen(
+          initialPaintIds: [for (final paint in paints) paint.id],
+        ),
+      ),
+    );
   }
 
   void _sample(Offset position, Size viewport) {
@@ -137,7 +169,13 @@ class _ColorSearchScreenState extends State<ColorSearchScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  IconButton(
+                    tooltip: l10n.colorSearchAddColor,
+                    icon: const Icon(Icons.add_circle_outline),
+                    onPressed: () =>
+                        setState(() => _palette.add(_color.toColor())),
+                  ),
+                  const SizedBox(width: 4),
                   Expanded(
                     child: SegmentedButton<PaintScope>(
                       segments: [
@@ -163,6 +201,50 @@ class _ColorSearchScreenState extends State<ColorSearchScreen> {
                 ],
               ),
             ),
+            // The collected palette: sampled tones on their way to becoming
+            // a recipe draft. Tapping a dot removes it — no dialog for an
+            // action this cheap to redo.
+            if (_palette.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Wrap(
+                        spacing: 6,
+                        runSpacing: 6,
+                        children: [
+                          for (var i = 0; i < _palette.length; i++)
+                            GestureDetector(
+                              onTap: () =>
+                                  setState(() => _palette.removeAt(i)),
+                              child: Container(
+                                width: 24,
+                                height: 24,
+                                decoration: BoxDecoration(
+                                  color: _palette[i],
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .outlineVariant,
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    FilledButton.tonalIcon(
+                      onPressed: _createRecipeFromPalette,
+                      icon: const Icon(Icons.auto_stories_outlined, size: 18),
+                      label: Text(
+                        l10n.colorSearchCreateRecipe(_palette.length),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             Expanded(
               child: matches.isEmpty
                   ? Padding(

@@ -60,6 +60,26 @@ class RecipesProvider extends ChangeNotifier {
 
   Future<String> create(Recipe recipe) => _repository.create(recipe);
 
+  /// Copies [original] as a fresh PRIVATE draft and returns the new id.
+  ///
+  /// The painter's pattern behind it: the same scheme across a squad with
+  /// one change. Sections and links carry over; sharing state does not (a
+  /// copy nobody asked to publish must never be born public), and neither
+  /// does the photo — photoUrl points at ONE Storage object, and deleting
+  /// either recipe would take the other's picture with it.
+  Future<String> duplicate(Recipe original, {required String copyName}) {
+    return create(
+      Recipe(
+        id: '',
+        name: copyName,
+        description: original.description,
+        sections: original.sections,
+        links: original.links,
+        updatedAt: DateTime.now(),
+      ),
+    );
+  }
+
   /// Saves the recipe and, if it is published, pushes the update to the
   /// public copy so every linked account sees the latest version.
   Future<void> update(Recipe recipe) async {

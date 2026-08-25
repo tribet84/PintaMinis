@@ -1,4 +1,4 @@
-import 'dart:ui' show Offset, Size;
+import 'dart:ui' show Color, Offset, Size;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
@@ -46,6 +46,35 @@ void main() {
             catalog, {'citadel-mephiston-red', 'citadel-averland-sunset'}),
         isEmpty,
       );
+    });
+  });
+
+
+  group('paintsForPalette', () {
+    test('resolves each colour to its best match, deduplicated, in order',
+        () {
+      // Red then black, sampled twice each — the recipe wants two paints,
+      // not four, and in the order the palette was collected.
+      final paints = paintsForPalette(catalog.paints, const [
+        Color(0xFF9A1115),
+        Color(0xFF9A1115),
+        Color(0xFF000000),
+      ]);
+
+      expect(paints.first.name, 'Mephiston Red');
+      expect(paints.map((p) => p.name).toSet().length, paints.length);
+    });
+
+    test('a colour with nothing close resolves to nothing, not to noise',
+        () {
+      // Against a shelf holding ONLY a red, pure blue has no honest match —
+      // the palette must come back without it rather than offering the red.
+      // (The full catalogue is no good for this test: since AK and the GSW
+      // fluors landed, even laser magenta has a legitimate neighbour.)
+      final onlyRed =
+          catalog.paints.where((p) => p.id == 'citadel-mephiston-red');
+      final paints = paintsForPalette(onlyRed, const [Color(0xFF0000FF)]);
+      expect(paints, isEmpty);
     });
   });
 

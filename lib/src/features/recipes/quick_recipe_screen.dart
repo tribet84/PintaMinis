@@ -24,7 +24,11 @@ import 'recipe_photo_picker.dart';
 /// them as a single section so the full editor can split it into proper
 /// sections later — same model, no migration, no second recipe type.
 class QuickRecipeScreen extends StatefulWidget {
-  const QuickRecipeScreen({super.key});
+  const QuickRecipeScreen({super.key, this.initialPaintIds = const []});
+
+  /// Paints the draft starts with — the colour search hands its resolved
+  /// palette in here, so "sample the mini, get a recipe" is one flow.
+  final List<String> initialPaintIds;
 
   @override
   State<QuickRecipeScreen> createState() => _QuickRecipeScreenState();
@@ -32,7 +36,7 @@ class QuickRecipeScreen extends StatefulWidget {
 
 class _QuickRecipeScreenState extends State<QuickRecipeScreen> {
   final _nameController = TextEditingController();
-  final _paintIds = <String>[];
+  late final List<String> _paintIds = List.of(widget.initialPaintIds);
   Uint8List? _pendingPhoto;
   var _saving = false;
 

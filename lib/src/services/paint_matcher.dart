@@ -126,6 +126,29 @@ List<ColorMatch> closestToColor(
   ];
 }
 
+/// Resolves a sampled palette to concrete paints, one per colour, in
+/// palette order, deduplicated.
+///
+/// Backs "create a recipe from these colours": each colour takes its single
+/// best match among [candidates] — but only an honest one (inside the
+/// deltaE-10 tiers). A colour with nothing close resolves to NOTHING rather
+/// than to the least-bad pot; a recipe is a list of paints someone will
+/// actually reach for, not a ranking exercise.
+List<Paint> paintsForPalette(
+  Iterable<Paint> candidates,
+  List<Color> colors,
+) {
+  final seen = <String>{};
+  final resolved = <Paint>[];
+  for (final color in colors) {
+    final matches = closestToColor(candidates, color, limit: 1);
+    if (matches.isEmpty || matches.first.tier == null) continue;
+    final paint = matches.first.paint;
+    if (seen.add(paint.id)) resolved.add(paint);
+  }
+  return resolved;
+}
+
 /// Two pots on the same shelf that are the same colour to the eye.
 typedef OwnedTwin = ({Paint a, Paint b, double deltaE});
 

@@ -64,11 +64,16 @@ class RecipeDetailScreen extends StatelessWidget {
                   ),
                 ),
               'list' => createListFromRecipe(context, recipe),
+              'duplicate' => _duplicate(context, recipe),
               'delete' => _delete(context, recipe),
               _ => null,
             },
             itemBuilder: (context) => [
               PopupMenuItem(value: 'edit', child: Text(l10n.recipeEdit)),
+              PopupMenuItem(
+                value: 'duplicate',
+                child: Text(l10n.recipeDuplicate),
+              ),
               PopupMenuItem(
                 value: 'list',
                 child: Text(l10n.recipeCreateList),
@@ -269,6 +274,27 @@ class RecipeDetailScreen extends StatelessWidget {
             const SizedBox(height: 8),
           ],
         ),
+      ),
+    );
+  }
+
+  Future<void> _duplicate(BuildContext context, Recipe recipe) async {
+    final l10n = AppLocalizations.of(context);
+    final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final provider = context.read<RecipesProvider>();
+
+    final newId = await provider.duplicate(
+      recipe,
+      copyName: l10n.recipeCopyName(recipe.name),
+    );
+    messenger.showSnackBar(SnackBar(content: Text(l10n.recipeDuplicated)));
+    // Land ON the copy: the whole point of duplicating is editing it next,
+    // and finding yourself still on the original invites editing the wrong
+    // one.
+    navigator.pushReplacement(
+      MaterialPageRoute<void>(
+        builder: (_) => RecipeDetailScreen(recipeId: newId),
       ),
     );
   }
