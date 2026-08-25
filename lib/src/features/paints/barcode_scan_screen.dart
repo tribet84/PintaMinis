@@ -38,7 +38,20 @@ class _BarcodeScanScreenState extends State<BarcodeScanScreen> {
   /// the barcode is just rendered at too few pixels), and tapToFocus (wired
   /// through MobileScanner below) lets a still-blurry shot be corrected by
   /// touching the code instead of guessing at distance.
-  late final _controller = MobileScannerController(autoZoom: true);
+  late final _controller = MobileScannerController(
+    autoZoom: true,
+    // Narrowed to the formats a retail pot actually carries. Left at the
+    // library's default (empty = "detect everything"), the decoder spends
+    // cycles also checking every frame for QR, DataMatrix, PDF417 and
+    // half a dozen other symbologies no paint label will ever use —
+    // pure overhead competing with the one format that matters here.
+    formats: const [
+      BarcodeFormat.ean13,
+      BarcodeFormat.ean8,
+      BarcodeFormat.upcA,
+      BarcodeFormat.upcE,
+    ],
+  );
 
   /// Only true EAN shapes reach the session: the camera also reads QR codes
   /// and whatever else crosses the frame, and none of that is a pot.
