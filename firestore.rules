@@ -73,6 +73,23 @@ service cloud.firestore {
     }
 
     // Public copies of shared recipes. Anyone signed in can read; only the
+    // Community EAN -> paint mapping, built one scan at a time. CREATE-ONLY
+    // by design: no update, no delete, not even by the author. First write
+    // wins, which kills both vandalism and edit wars without moderation —
+    // a wrong mapping is rare enough to be an admin correction, not a
+    // client capability. The ean must look like an EAN, and the author
+    // field must be the real author, so abuse stays traceable.
+    match /barcodes/{ean} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+        && ean.matches('[0-9]{8,14}')
+        && request.resource.data.keys().hasOnly(['paintId', 'addedBy', 'addedAt'])
+        && request.resource.data.paintId is string
+        && request.resource.data.paintId.size() > 0
+        && request.resource.data.paintId.size() < 120
+        && request.resource.data.addedBy == request.auth.uid;
+    }
+
     // owner can create, update or remove them, and ownership can never be
     // reassigned.
     match /publishedRecipes/{publishedId} {
