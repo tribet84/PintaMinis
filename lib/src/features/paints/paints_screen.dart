@@ -12,7 +12,6 @@ import '../../widgets/paint_widgets.dart';
 import '../../widgets/brand_loader.dart';
 import '../../widgets/shelf_starter.dart';
 import '../../widgets/paint_detail_sheet.dart';
-import 'barcode_scan_screen.dart';
 import 'color_search_screen.dart';
 import 'twins_screen.dart';
 
@@ -347,17 +346,6 @@ class _FilterHeader extends StatelessWidget {
                 onPressed: () => Navigator.of(context).push(
                   MaterialPageRoute<void>(
                     builder: (_) => const ColorSearchScreen(),
-                  ),
-                ),
-              ),
-              // And the scanner finds the pot in your HAND — the third way
-              // of asking, with the least typing of all.
-              IconButton(
-                tooltip: l10n.scanTooltip,
-                icon: const Icon(Icons.qr_code_scanner),
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => const BarcodeScanScreen(),
                   ),
                 ),
               ),

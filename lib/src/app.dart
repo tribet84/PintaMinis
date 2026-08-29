@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 
 import '../l10n/generated/app_localizations.dart';
 import 'data/account_repository.dart';
-import 'data/barcode_repository.dart';
 import 'data/catalog_repository.dart';
 import 'data/inventory_repository.dart';
 import 'data/paint_list_repository.dart';
@@ -146,9 +145,6 @@ class _AuthGate extends StatelessWidget {
             ),
             Provider<PublishedRecipeRepository>.value(
               value: publishedRepository,
-            ),
-            Provider<BarcodeRepository>(
-              create: (_) => FirestoreBarcodeRepository(uid: user.uid),
             ),
             Provider<RecipePhotoRepository>.value(value: photoRepository),
             ChangeNotifierProvider<FollowsProvider>(
