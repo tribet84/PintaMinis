@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart' hide Paint;
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:provider/provider.dart';
@@ -5,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../data/barcode_repository.dart';
 import '../../data/catalog_repository.dart';
+import '../../services/camera_control.dart';
 import '../../state/inventory_provider.dart';
 import '../../state/scan_session.dart';
 import '../../widgets/paint_widgets.dart';
@@ -32,14 +35,14 @@ class _BarcodeScanScreenState extends State<BarcodeScanScreen> {
     inventory: context.read<InventoryProvider>(),
   );
 
-  /// Defaults left off by the package are exactly what a tiny pot label
-  /// needs turned on: autoZoom pushes in when a code is too small in frame
-  /// to read (the usual cause of "it looks blurry" — the lens is in focus,
-  /// the barcode is just rendered at too few pixels), and tapToFocus (wired
-  /// through MobileScanner below) lets a still-blurry shot be corrected by
-  /// touching the code instead of guessing at distance.
+  /// `autoZoom` and `tapToFocus` are deliberately NOT set here.
+  ///
+  /// On web this package's `setZoomScale` throws `UnsupportedError` and its
+  /// `setFocusPoint` throws `UnimplementedError`, so both flags are inert —
+  /// setting them only reads as if the camera were being driven when it is
+  /// not. The zoom that actually reaches the hardware is applied through
+  /// [camera_control], straight onto the underlying media track.
   late final _controller = MobileScannerController(
-    autoZoom: true,
     // Narrowed to the formats a retail pot actually carries. Left at the
     // library's default (empty = "detect everything"), the decoder spends
     // cycles also checking every frame for QR, DataMatrix, PDF417 and
@@ -57,8 +60,52 @@ class _BarcodeScanScreenState extends State<BarcodeScanScreen> {
   /// and whatever else crosses the frame, and none of that is a pot.
   static final _eanShape = RegExp(r'^[0-9]{8,14}$');
 
+  /// What the live camera turned out to support, once it had started.
+  CameraCapabilities? _camera;
+  double _zoom = 1;
+  Timer? _cameraProbe;
+
+  @override
+  void initState() {
+    super.initState();
+    _probeCamera();
+  }
+
+  /// The preview needs a moment to negotiate a stream before there is any
+  /// track to interrogate, and how long varies by device. Polling briefly
+  /// beats a fixed delay picked to look right on one phone.
+  void _probeCamera() {
+    const interval = Duration(milliseconds: 300);
+    var attemptsLeft = 20;
+
+    _cameraProbe = Timer.periodic(interval, (timer) async {
+      final capabilities = readCameraCapabilities();
+      if (capabilities == null) {
+        if (--attemptsLeft <= 0) timer.cancel();
+        return;
+      }
+      timer.cancel();
+
+      // Open already zoomed in. A dropper-bottle barcode is ~25mm wide, so
+      // at the closest distance the lens can still focus it lands on too few
+      // pixels per bar to decode — and moving closer only defocuses it.
+      // Zoom is what breaks that deadlock, and it should not depend on the
+      // user finding a slider first.
+      final start = capabilities.suggestedZoom;
+      if (capabilities.hasZoom) {
+        await applyCameraZoom(start);
+      }
+      if (!mounted) return;
+      setState(() {
+        _camera = capabilities;
+        _zoom = start;
+      });
+    });
+  }
+
   @override
   void dispose() {
+    _cameraProbe?.cancel();
     _session.dispose();
     _controller.dispose();
     super.dispose();
@@ -158,6 +205,15 @@ class _BarcodeScanScreenState extends State<BarcodeScanScreen> {
                       ),
                 ),
               ),
+              _CameraControls(
+                camera: _camera,
+                zoom: _zoom,
+                onZoomChanged: (value) {
+                  setState(() => _zoom = value);
+                  applyCameraZoom(value);
+                },
+                onRefocus: retriggerAutofocus,
+              ),
               // One line of live feedback, not a snackbar per pot: at one
               // scan a second, stacked snackbars would bury the camera.
               Container(
@@ -228,6 +284,90 @@ class _BarcodeScanScreenState extends State<BarcodeScanScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Zoom, refocus, and an honest read-out of what the camera is delivering.
+///
+/// Renders nothing until the camera has answered, and only shows each control
+/// the device actually supports — an inert slider on a laptop webcam would
+/// be one more thing that looks like it should help and does not.
+class _CameraControls extends StatelessWidget {
+  const _CameraControls({
+    required this.camera,
+    required this.zoom,
+    required this.onZoomChanged,
+    required this.onRefocus,
+  });
+
+  final CameraCapabilities? camera;
+  final double zoom;
+  final ValueChanged<double> onZoomChanged;
+  final Future<bool> Function() onRefocus;
+
+  @override
+  Widget build(BuildContext context) {
+    final camera = this.camera;
+    if (camera == null) return const SizedBox.shrink();
+
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (camera.hasZoom)
+            Row(
+              children: [
+                const Icon(Icons.zoom_out, size: 20),
+                Expanded(
+                  child: Slider(
+                    value: zoom.clamp(camera.minZoom, camera.maxZoom),
+                    min: camera.minZoom,
+                    max: camera.maxZoom,
+                    label: '${zoom.toStringAsFixed(1)}x',
+                    onChanged: onZoomChanged,
+                  ),
+                ),
+                const Icon(Icons.zoom_in, size: 20),
+                const SizedBox(width: 8),
+                SizedBox(
+                  width: 44,
+                  child: Text(
+                    '${zoom.toStringAsFixed(1)}x',
+                    textAlign: TextAlign.end,
+                    style: theme.textTheme.labelLarge,
+                  ),
+                ),
+              ],
+            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Continuous autofocus can lock onto the background behind a
+              // small pot and never let go. This is the way back.
+              TextButton.icon(
+                onPressed: () => onRefocus(),
+                icon: const Icon(Icons.center_focus_strong, size: 18),
+                label: Text(l10n.scanRefocus),
+              ),
+              // The delivered resolution is the number that decides whether a
+              // barcode CAN decode, and it is invisible everywhere else. When
+              // a pot still will not read, this is the first thing worth
+              // knowing — so it is on screen rather than in a console.
+              Text(
+                l10n.scanCameraInfo(camera.width, camera.height),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
