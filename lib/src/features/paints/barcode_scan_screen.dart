@@ -7,8 +7,10 @@ import 'package:provider/provider.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../data/barcode_repository.dart';
 import '../../data/catalog_repository.dart';
+import '../../services/barcode_validation.dart';
 import '../../services/camera_control.dart';
 import '../../state/inventory_provider.dart';
+import '../../state/scan_gate.dart';
 import '../../state/scan_session.dart';
 import '../../widgets/paint_widgets.dart';
 import '../recipes/recipe_paint_picker_screen.dart';
@@ -43,22 +45,18 @@ class _BarcodeScanScreenState extends State<BarcodeScanScreen> {
   /// not. The zoom that actually reaches the hardware is applied through
   /// [camera_control], straight onto the underlying media track.
   late final _controller = MobileScannerController(
-    // Narrowed to the formats a retail pot actually carries. Left at the
-    // library's default (empty = "detect everything"), the decoder spends
-    // cycles also checking every frame for QR, DataMatrix, PDF417 and
-    // half a dozen other symbologies no paint label will ever use —
-    // pure overhead competing with the one format that matters here.
-    formats: const [
-      BarcodeFormat.ean13,
-      BarcodeFormat.ean8,
-      BarcodeFormat.upcA,
-      BarcodeFormat.upcE,
-    ],
+    // Narrowed to the two formats a paint pot actually carries. Beyond
+    // saving the decoder from scanning every frame for QR, DataMatrix and
+    // PDF417, this removes a real source of wrong readings: EAN-8 and UPC-E
+    // are short symbologies, and a partly-visible EAN-13 can satisfy one of
+    // them, yielding a confident code that was never on the label. No pot
+    // from any brand in this catalogue uses them, so the risk buys nothing.
+    formats: const [BarcodeFormat.ean13, BarcodeFormat.upcA],
   );
 
-  /// Only true EAN shapes reach the session: the camera also reads QR codes
-  /// and whatever else crosses the frame, and none of that is a pot.
-  static final _eanShape = RegExp(r'^[0-9]{8,14}$');
+  /// Nothing reaches the shelf on a single frame's say-so — see [ScanGate].
+  final _gate = ScanGate();
+
 
   /// What the live camera turned out to support, once it had started.
   CameraCapabilities? _camera;
@@ -111,13 +109,83 @@ class _BarcodeScanScreenState extends State<BarcodeScanScreen> {
     super.dispose();
   }
 
+  /// Three gates stand between a frame and the shelf, because a wrong pot
+  /// added silently is worse than a scan that visibly did not take.
+  ///
+  ///  1. the code must be a well-formed EAN-13/UPC-A whose check digit
+  ///     agrees — this alone rejects most misreads of a curved label;
+  ///  2. it must then be seen repeatedly, since roughly one misread in ten
+  ///     satisfies a check digit by luck and the camera offers dozens of
+  ///     frames per pot;
+  ///  3. only then does the session decide what it means.
   void _onDetect(BarcodeCapture capture) {
+    final now = DateTime.now();
     for (final barcode in capture.barcodes) {
-      final value = barcode.rawValue;
-      if (value != null && _eanShape.hasMatch(value)) {
-        _session.handle(value);
-      }
+      final raw = barcode.rawValue;
+      if (raw == null) continue;
+
+      final code = normalizeBarcode(raw);
+      if (code == null) continue;
+
+      final confirmed = _gate.offer(code, now);
+      if (confirmed != null) _session.handle(confirmed);
     }
+  }
+
+  /// Types a code in by hand.
+  ///
+  /// Some labels will not scan however good the camera handling gets: a bent
+  /// dropper bottle, a torn or overprinted barcode. The digits are printed
+  /// under every barcode, so there is always a way through — and it goes
+  /// through exactly the same validation, so a typo cannot enter either.
+  Future<void> _enterManually() async {
+    final l10n = AppLocalizations.of(context);
+    final controller = TextEditingController();
+    var error = false;
+
+    final code = await showDialog<String>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          void submit() {
+            final normalized = normalizeBarcode(controller.text);
+            if (normalized == null) {
+              setDialogState(() => error = true);
+              return;
+            }
+            Navigator.of(context).pop(normalized);
+          }
+
+          return AlertDialog(
+            title: Text(l10n.scanManualTitle),
+            content: TextField(
+              controller: controller,
+              autofocus: true,
+              keyboardType: TextInputType.number,
+              onChanged: (_) {
+                if (error) setDialogState(() => error = false);
+              },
+              onSubmitted: (_) => submit(),
+              decoration: InputDecoration(
+                labelText: l10n.scanManualLabel,
+                helperText: l10n.scanManualHelp,
+                errorText: error ? l10n.scanManualInvalid : null,
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(l10n.actionCancel),
+              ),
+              FilledButton(onPressed: submit, child: Text(l10n.scanManualAdd)),
+            ],
+          );
+        },
+      ),
+    );
+
+    controller.dispose();
+    if (code != null) await _session.handle(code);
   }
 
   Future<void> _identify(String ean) async {
@@ -156,6 +224,13 @@ class _BarcodeScanScreenState extends State<BarcodeScanScreen> {
       appBar: AppBar(
         title: Text(l10n.scanTitle),
         actions: [
+          // Always available, not a last resort buried behind a failure:
+          // some labels never scan, and the digits are printed right there.
+          IconButton(
+            tooltip: l10n.scanManualEntry,
+            icon: const Icon(Icons.keyboard),
+            onPressed: _enterManually,
+          ),
           // Low light forces a longer exposure, which reads as motion blur
           // on a hand-held pot — the torch is the direct fix for that,
           // distinct from the focus problem tapToFocus solves.
