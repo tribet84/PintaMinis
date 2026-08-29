@@ -8,7 +8,12 @@
     "Game Color Special FX",
     "Xpress Color",
     "Model Wash",
-    "Game Color Wash"
+    "Game Color Wash",
+    "True Metallic Metal Base",
+    "True Metallic Metal Light",
+    "True Metallic Metal Shade",
+    "True Metallic Metal Airbrush",
+    "Metal Color"
   ],
   "paints": [
     {
@@ -1487,6 +1492,685 @@
       "range": "Game Color Wash",
       "code": "73.208",
       "hex": "#C9A227"
+    },
+    {
+      "id": "vallejo-77139-aged-metal",
+      "name": "Aged Metal",
+      "range": "True Metallic Metal Base",
+      "code": "77.139",
+      "hex": "#6E6A62"
+    },
+    {
+      "id": "vallejo-77135-amber-green",
+      "name": "Amber Green",
+      "range": "True Metallic Metal Base",
+      "code": "77.135",
+      "hex": "#8A9A2E"
+    },
+    {
+      "id": "vallejo-77128-amethyst-purple",
+      "name": "Amethyst Purple",
+      "range": "True Metallic Metal Base",
+      "code": "77.128",
+      "hex": "#6E3B8F"
+    },
+    {
+      "id": "vallejo-77124-ancient-copper",
+      "name": "Ancient Copper",
+      "range": "True Metallic Metal Base",
+      "code": "77.124",
+      "hex": "#A85C38"
+    },
+    {
+      "id": "vallejo-77137-arcane-gold",
+      "name": "Arcane Gold",
+      "range": "True Metallic Metal Base",
+      "code": "77.137",
+      "hex": "#B8862B"
+    },
+    {
+      "id": "vallejo-77133-beetle-green",
+      "name": "Beetle Green",
+      "range": "True Metallic Metal Base",
+      "code": "77.133",
+      "hex": "#1F7A4A"
+    },
+    {
+      "id": "vallejo-77129-celestial-violet",
+      "name": "Celestial Violet",
+      "range": "True Metallic Metal Base",
+      "code": "77.129",
+      "hex": "#4E3E9E"
+    },
+    {
+      "id": "vallejo-77127-crimson-magenta",
+      "name": "Crimson Magenta",
+      "range": "True Metallic Metal Base",
+      "code": "77.127",
+      "hex": "#A62260"
+    },
+    {
+      "id": "vallejo-77134-dusken-green",
+      "name": "Dusken Green",
+      "range": "True Metallic Metal Base",
+      "code": "77.134",
+      "hex": "#3E6B3A"
+    },
+    {
+      "id": "vallejo-77125-forged-red",
+      "name": "Forged Red",
+      "range": "True Metallic Metal Base",
+      "code": "77.125",
+      "hex": "#A32424"
+    },
+    {
+      "id": "vallejo-77136-greenish-gold",
+      "name": "Greenish Gold",
+      "range": "True Metallic Metal Base",
+      "code": "77.136",
+      "hex": "#A8A23A"
+    },
+    {
+      "id": "vallejo-77132-hydra-turquoise",
+      "name": "Hydra Turquoise",
+      "range": "True Metallic Metal Base",
+      "code": "77.132",
+      "hex": "#1B8A8A"
+    },
+    {
+      "id": "vallejo-77123-imperial-gold",
+      "name": "Imperial Gold",
+      "range": "True Metallic Metal Base",
+      "code": "77.123",
+      "hex": "#C9962F"
+    },
+    {
+      "id": "vallejo-77140-obsidian-black",
+      "name": "Obsidian Black",
+      "range": "True Metallic Metal Base",
+      "code": "77.140",
+      "hex": "#23262A"
+    },
+    {
+      "id": "vallejo-77122-radiant-yellow",
+      "name": "Radiant Yellow",
+      "range": "True Metallic Metal Base",
+      "code": "77.122",
+      "hex": "#E0B424"
+    },
+    {
+      "id": "vallejo-77126-ruby-red",
+      "name": "Ruby Red",
+      "range": "True Metallic Metal Base",
+      "code": "77.126",
+      "hex": "#8F1A38"
+    },
+    {
+      "id": "vallejo-77138-rusty-metal",
+      "name": "Rusty Metal",
+      "range": "True Metallic Metal Base",
+      "code": "77.138",
+      "hex": "#8A4A26"
+    },
+    {
+      "id": "vallejo-77131-sapphire-blue",
+      "name": "Sapphire Blue",
+      "range": "True Metallic Metal Base",
+      "code": "77.131",
+      "hex": "#1F63B0"
+    },
+    {
+      "id": "vallejo-77121-sterling-silver",
+      "name": "Sterling Silver",
+      "range": "True Metallic Metal Base",
+      "code": "77.121",
+      "hex": "#C0C4C8"
+    },
+    {
+      "id": "vallejo-77130-ultramarine-blue",
+      "name": "Ultramarine Blue",
+      "range": "True Metallic Metal Base",
+      "code": "77.130",
+      "hex": "#2E4CA8"
+    },
+    {
+      "id": "vallejo-77119-aged-metal",
+      "name": "Aged Metal",
+      "range": "True Metallic Metal Light",
+      "code": "77.119",
+      "hex": "#A19E99"
+    },
+    {
+      "id": "vallejo-77115-amber-green",
+      "name": "Amber Green",
+      "range": "True Metallic Metal Light",
+      "code": "77.115",
+      "hex": "#B3BD77"
+    },
+    {
+      "id": "vallejo-77108-amethyst-purple",
+      "name": "Amethyst Purple",
+      "range": "True Metallic Metal Light",
+      "code": "77.108",
+      "hex": "#A180B6"
+    },
+    {
+      "id": "vallejo-77104-ancient-copper",
+      "name": "Ancient Copper",
+      "range": "True Metallic Metal Light",
+      "code": "77.104",
+      "hex": "#C6957E"
+    },
+    {
+      "id": "vallejo-77117-arcane-gold",
+      "name": "Arcane Gold",
+      "range": "True Metallic Metal Light",
+      "code": "77.117",
+      "hex": "#D1B075"
+    },
+    {
+      "id": "vallejo-77113-beetle-green",
+      "name": "Beetle Green",
+      "range": "True Metallic Metal Light",
+      "code": "77.113",
+      "hex": "#6DA989"
+    },
+    {
+      "id": "vallejo-77109-celestial-violet",
+      "name": "Celestial Violet",
+      "range": "True Metallic Metal Light",
+      "code": "77.109",
+      "hex": "#8C82C0"
+    },
+    {
+      "id": "vallejo-77107-crimson-magenta",
+      "name": "Crimson Magenta",
+      "range": "True Metallic Metal Light",
+      "code": "77.107",
+      "hex": "#C56F98"
+    },
+    {
+      "id": "vallejo-77114-dusken-green",
+      "name": "Dusken Green",
+      "range": "True Metallic Metal Light",
+      "code": "77.114",
+      "hex": "#829F7F"
+    },
+    {
+      "id": "vallejo-77105-forged-red",
+      "name": "Forged Red",
+      "range": "True Metallic Metal Light",
+      "code": "77.105",
+      "hex": "#C37171"
+    },
+    {
+      "id": "vallejo-77116-greenish-gold",
+      "name": "Greenish Gold",
+      "range": "True Metallic Metal Light",
+      "code": "77.116",
+      "hex": "#C6C37F"
+    },
+    {
+      "id": "vallejo-77112-hydra-turquoise",
+      "name": "Hydra Turquoise",
+      "range": "True Metallic Metal Light",
+      "code": "77.112",
+      "hex": "#6BB3B3"
+    },
+    {
+      "id": "vallejo-77103-imperial-gold",
+      "name": "Imperial Gold",
+      "range": "True Metallic Metal Light",
+      "code": "77.103",
+      "hex": "#DCBB78"
+    },
+    {
+      "id": "vallejo-77120-obsidian-black",
+      "name": "Obsidian Black",
+      "range": "True Metallic Metal Light",
+      "code": "77.120",
+      "hex": "#707275"
+    },
+    {
+      "id": "vallejo-77102-radiant-yellow",
+      "name": "Radiant Yellow",
+      "range": "True Metallic Metal Light",
+      "code": "77.102",
+      "hex": "#EBCE71"
+    },
+    {
+      "id": "vallejo-77106-ruby-red",
+      "name": "Ruby Red",
+      "range": "True Metallic Metal Light",
+      "code": "77.106",
+      "hex": "#B66A7E"
+    },
+    {
+      "id": "vallejo-77118-rusty-metal",
+      "name": "Rusty Metal",
+      "range": "True Metallic Metal Light",
+      "code": "77.118",
+      "hex": "#B38972"
+    },
+    {
+      "id": "vallejo-77111-sapphire-blue",
+      "name": "Sapphire Blue",
+      "range": "True Metallic Metal Light",
+      "code": "77.111",
+      "hex": "#6D9ACC"
+    },
+    {
+      "id": "vallejo-77101-sterling-silver",
+      "name": "Sterling Silver",
+      "range": "True Metallic Metal Light",
+      "code": "77.101",
+      "hex": "#D6D9DB"
+    },
+    {
+      "id": "vallejo-77110-ultramarine-blue",
+      "name": "Ultramarine Blue",
+      "range": "True Metallic Metal Light",
+      "code": "77.110",
+      "hex": "#778BC6"
+    },
+    {
+      "id": "vallejo-77159-aged-metal",
+      "name": "Aged Metal",
+      "range": "True Metallic Metal Shade",
+      "code": "77.159",
+      "hex": "#42403B"
+    },
+    {
+      "id": "vallejo-77155-amber-green",
+      "name": "Amber Green",
+      "range": "True Metallic Metal Shade",
+      "code": "77.155",
+      "hex": "#535C1C"
+    },
+    {
+      "id": "vallejo-77148-amethyst-purple",
+      "name": "Amethyst Purple",
+      "range": "True Metallic Metal Shade",
+      "code": "77.148",
+      "hex": "#422356"
+    },
+    {
+      "id": "vallejo-77144-ancient-copper",
+      "name": "Ancient Copper",
+      "range": "True Metallic Metal Shade",
+      "code": "77.144",
+      "hex": "#653722"
+    },
+    {
+      "id": "vallejo-77157-arcane-gold",
+      "name": "Arcane Gold",
+      "range": "True Metallic Metal Shade",
+      "code": "77.157",
+      "hex": "#6E501A"
+    },
+    {
+      "id": "vallejo-77153-beetle-green",
+      "name": "Beetle Green",
+      "range": "True Metallic Metal Shade",
+      "code": "77.153",
+      "hex": "#13492C"
+    },
+    {
+      "id": "vallejo-77149-celestial-violet",
+      "name": "Celestial Violet",
+      "range": "True Metallic Metal Shade",
+      "code": "77.149",
+      "hex": "#2F255F"
+    },
+    {
+      "id": "vallejo-77147-crimson-magenta",
+      "name": "Crimson Magenta",
+      "range": "True Metallic Metal Shade",
+      "code": "77.147",
+      "hex": "#64143A"
+    },
+    {
+      "id": "vallejo-77154-dusken-green",
+      "name": "Dusken Green",
+      "range": "True Metallic Metal Shade",
+      "code": "77.154",
+      "hex": "#254023"
+    },
+    {
+      "id": "vallejo-77145-forged-red",
+      "name": "Forged Red",
+      "range": "True Metallic Metal Shade",
+      "code": "77.145",
+      "hex": "#621616"
+    },
+    {
+      "id": "vallejo-77156-greenish-gold",
+      "name": "Greenish Gold",
+      "range": "True Metallic Metal Shade",
+      "code": "77.156",
+      "hex": "#656123"
+    },
+    {
+      "id": "vallejo-77152-hydra-turquoise",
+      "name": "Hydra Turquoise",
+      "range": "True Metallic Metal Shade",
+      "code": "77.152",
+      "hex": "#105353"
+    },
+    {
+      "id": "vallejo-77143-imperial-gold",
+      "name": "Imperial Gold",
+      "range": "True Metallic Metal Shade",
+      "code": "77.143",
+      "hex": "#795A1C"
+    },
+    {
+      "id": "vallejo-77160-obsidian-black",
+      "name": "Obsidian Black",
+      "range": "True Metallic Metal Shade",
+      "code": "77.160",
+      "hex": "#151719"
+    },
+    {
+      "id": "vallejo-77142-radiant-yellow",
+      "name": "Radiant Yellow",
+      "range": "True Metallic Metal Shade",
+      "code": "77.142",
+      "hex": "#866C16"
+    },
+    {
+      "id": "vallejo-77146-ruby-red",
+      "name": "Ruby Red",
+      "range": "True Metallic Metal Shade",
+      "code": "77.146",
+      "hex": "#561022"
+    },
+    {
+      "id": "vallejo-77158-rusty-metal",
+      "name": "Rusty Metal",
+      "range": "True Metallic Metal Shade",
+      "code": "77.158",
+      "hex": "#532C17"
+    },
+    {
+      "id": "vallejo-77151-sapphire-blue",
+      "name": "Sapphire Blue",
+      "range": "True Metallic Metal Shade",
+      "code": "77.151",
+      "hex": "#133B6A"
+    },
+    {
+      "id": "vallejo-77141-sterling-silver",
+      "name": "Sterling Silver",
+      "range": "True Metallic Metal Shade",
+      "code": "77.141",
+      "hex": "#737678"
+    },
+    {
+      "id": "vallejo-77150-ultramarine-blue",
+      "name": "Ultramarine Blue",
+      "range": "True Metallic Metal Shade",
+      "code": "77.150",
+      "hex": "#1C2E65"
+    },
+    {
+      "id": "vallejo-77179-aged-metal",
+      "name": "Aged Metal",
+      "range": "True Metallic Metal Airbrush",
+      "code": "77.179",
+      "hex": "#6E6A62"
+    },
+    {
+      "id": "vallejo-77175-amber-green",
+      "name": "Amber Green",
+      "range": "True Metallic Metal Airbrush",
+      "code": "77.175",
+      "hex": "#8A9A2E"
+    },
+    {
+      "id": "vallejo-77168-amethyst-purple",
+      "name": "Amethyst Purple",
+      "range": "True Metallic Metal Airbrush",
+      "code": "77.168",
+      "hex": "#6E3B8F"
+    },
+    {
+      "id": "vallejo-77164-ancient-copper",
+      "name": "Ancient Copper",
+      "range": "True Metallic Metal Airbrush",
+      "code": "77.164",
+      "hex": "#A85C38"
+    },
+    {
+      "id": "vallejo-77177-arcane-gold",
+      "name": "Arcane Gold",
+      "range": "True Metallic Metal Airbrush",
+      "code": "77.177",
+      "hex": "#B8862B"
+    },
+    {
+      "id": "vallejo-77173-beetle-green",
+      "name": "Beetle Green",
+      "range": "True Metallic Metal Airbrush",
+      "code": "77.173",
+      "hex": "#1F7A4A"
+    },
+    {
+      "id": "vallejo-77169-celestial-violet",
+      "name": "Celestial Violet",
+      "range": "True Metallic Metal Airbrush",
+      "code": "77.169",
+      "hex": "#4E3E9E"
+    },
+    {
+      "id": "vallejo-77167-crimson-magenta",
+      "name": "Crimson Magenta",
+      "range": "True Metallic Metal Airbrush",
+      "code": "77.167",
+      "hex": "#A62260"
+    },
+    {
+      "id": "vallejo-77174-dusken-green",
+      "name": "Dusken Green",
+      "range": "True Metallic Metal Airbrush",
+      "code": "77.174",
+      "hex": "#3E6B3A"
+    },
+    {
+      "id": "vallejo-77165-forged-red",
+      "name": "Forged Red",
+      "range": "True Metallic Metal Airbrush",
+      "code": "77.165",
+      "hex": "#A32424"
+    },
+    {
+      "id": "vallejo-77176-greenish-gold",
+      "name": "Greenish Gold",
+      "range": "True Metallic Metal Airbrush",
+      "code": "77.176",
+      "hex": "#A8A23A"
+    },
+    {
+      "id": "vallejo-77172-hydra-turquoise",
+      "name": "Hydra Turquoise",
+      "range": "True Metallic Metal Airbrush",
+      "code": "77.172",
+      "hex": "#1B8A8A"
+    },
+    {
+      "id": "vallejo-77163-imperial-gold",
+      "name": "Imperial Gold",
+      "range": "True Metallic Metal Airbrush",
+      "code": "77.163",
+      "hex": "#C9962F"
+    },
+    {
+      "id": "vallejo-77180-obsidian-black",
+      "name": "Obsidian Black",
+      "range": "True Metallic Metal Airbrush",
+      "code": "77.180",
+      "hex": "#23262A"
+    },
+    {
+      "id": "vallejo-77162-radiant-yellow",
+      "name": "Radiant Yellow",
+      "range": "True Metallic Metal Airbrush",
+      "code": "77.162",
+      "hex": "#E0B424"
+    },
+    {
+      "id": "vallejo-77166-ruby-red",
+      "name": "Ruby Red",
+      "range": "True Metallic Metal Airbrush",
+      "code": "77.166",
+      "hex": "#8F1A38"
+    },
+    {
+      "id": "vallejo-77178-rusty-metal",
+      "name": "Rusty Metal",
+      "range": "True Metallic Metal Airbrush",
+      "code": "77.178",
+      "hex": "#8A4A26"
+    },
+    {
+      "id": "vallejo-77171-sapphire-blue",
+      "name": "Sapphire Blue",
+      "range": "True Metallic Metal Airbrush",
+      "code": "77.171",
+      "hex": "#1F63B0"
+    },
+    {
+      "id": "vallejo-77161-sterling-silver",
+      "name": "Sterling Silver",
+      "range": "True Metallic Metal Airbrush",
+      "code": "77.161",
+      "hex": "#C0C4C8"
+    },
+    {
+      "id": "vallejo-77170-ultramarine-blue",
+      "name": "Ultramarine Blue",
+      "range": "True Metallic Metal Airbrush",
+      "code": "77.170",
+      "hex": "#2E4CA8"
+    },
+    {
+      "id": "vallejo-77701-aluminium",
+      "name": "Aluminium",
+      "range": "Metal Color",
+      "code": "77.701",
+      "hex": "#C8CACC"
+    },
+    {
+      "id": "vallejo-77721-burnt-iron",
+      "name": "Burnt Iron",
+      "range": "Metal Color",
+      "code": "77.721",
+      "hex": "#4A423C"
+    },
+    {
+      "id": "vallejo-77707-chrome",
+      "name": "Chrome",
+      "range": "Metal Color",
+      "code": "77.707",
+      "hex": "#D8DBDE"
+    },
+    {
+      "id": "vallejo-77710-copper",
+      "name": "Copper",
+      "range": "Metal Color",
+      "code": "77.710",
+      "hex": "#B4643C"
+    },
+    {
+      "id": "vallejo-77703-dark-aluminium",
+      "name": "Dark Aluminium",
+      "range": "Metal Color",
+      "code": "77.703",
+      "hex": "#9A9EA2"
+    },
+    {
+      "id": "vallejo-77717-dull-aluminium",
+      "name": "Dull Aluminium",
+      "range": "Metal Color",
+      "code": "77.717",
+      "hex": "#A6A8AA"
+    },
+    {
+      "id": "vallejo-77702-duraluminium",
+      "name": "Duraluminium",
+      "range": "Metal Color",
+      "code": "77.702",
+      "hex": "#B8BCC0"
+    },
+    {
+      "id": "vallejo-77723-exhaust-manifold",
+      "name": "Exhaust Manifold",
+      "range": "Metal Color",
+      "code": "77.723",
+      "hex": "#6B5548"
+    },
+    {
+      "id": "vallejo-77725-gold",
+      "name": "Gold",
+      "range": "Metal Color",
+      "code": "77.725",
+      "hex": "#C08A2D"
+    },
+    {
+      "id": "vallejo-77720-gunmetal-grey",
+      "name": "Gunmetal Grey",
+      "range": "Metal Color",
+      "code": "77.720",
+      "hex": "#52565A"
+    },
+    {
+      "id": "vallejo-77713-jet-exhaust",
+      "name": "Jet Exhaust",
+      "range": "Metal Color",
+      "code": "77.713",
+      "hex": "#5C5A56"
+    },
+    {
+      "id": "vallejo-77711-magnesium",
+      "name": "Magnesium",
+      "range": "Metal Color",
+      "code": "77.711",
+      "hex": "#ACA8A0"
+    },
+    {
+      "id": "vallejo-77704-pale-burnt-metal",
+      "name": "Pale Burnt Metal",
+      "range": "Metal Color",
+      "code": "77.704",
+      "hex": "#8A8078"
+    },
+    {
+      "id": "vallejo-77716-semi-matte-aluminium",
+      "name": "Semi Matte Aluminium",
+      "range": "Metal Color",
+      "code": "77.716",
+      "hex": "#B4B6B8"
+    },
+    {
+      "id": "vallejo-77724-silver",
+      "name": "Silver",
+      "range": "Metal Color",
+      "code": "77.724",
+      "hex": "#C4C7CA"
+    },
+    {
+      "id": "vallejo-77712-steel",
+      "name": "Steel",
+      "range": "Metal Color",
+      "code": "77.712",
+      "hex": "#A0A4A8"
+    },
+    {
+      "id": "vallejo-77706-white-aluminium",
+      "name": "White Aluminium",
+      "range": "Metal Color",
+      "code": "77.706",
+      "hex": "#DADCDE"
     }
   ]
 }
